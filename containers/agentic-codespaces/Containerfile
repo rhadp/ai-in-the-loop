@@ -36,11 +36,11 @@ RUN if [ "$ARCH" = "arm64" ]; then \
     /home/tooling/google-cloud-sdk/install.sh --quiet --usage-reporting=false --command-completion=false --path-update=false && \
     rm -f /tmp/google-cloud-sdk.tar.gz
 
-# create the various config directories
+# create config directories under /home/tooling (image-local, not PVC-mounted)
+# directories under /home/user are created at runtime via devfile postStart
+# since /home/user is a PVC mount in DevSpaces and shadows image-built paths
 #RUN mkdir -p /home/tooling/.config/gcloud/configurations && \
-#    mkdir -p /home/tooling/.config/containers/certs.d && \
-#    mkdir -p /home/user/.config/gcloud/configurations && \
-#    mkdir -p /home/user/.config/containers/certs.d
+#    mkdir -p /home/tooling/.config/containers/certs.d
 
 # A last pass to make sure that an arbitrary user can write in $HOME
 RUN chgrp -R 0 /home && chmod -R g=u /home
