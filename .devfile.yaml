@@ -15,9 +15,7 @@ components:
       mountSources: true
       volumeMounts:
         - name: user-config
-          path: /home/user/.config
-        - name: user-config
-          path: /home/user/.claude
+          path: /home/user
   - name: user-config
     volume:
       size: 2Gi
