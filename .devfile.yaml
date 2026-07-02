@@ -13,12 +13,6 @@ components:
       cpuLimit: "4"
       cpuRequest: "1"
       mountSources: true
-      volumeMounts:
-        - name: user-config
-          path: /home/user
-  - name: user-config
-    volume:
-      size: 2Gi
 #commands:
 #  - id: init-workspace
 #    exec:
