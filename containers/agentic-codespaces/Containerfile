@@ -8,8 +8,11 @@ ARG TARGETARCH
 # install centos stream & fedora repos, other vars
 ENV ARCH=${TARGETARCH:-arm64}
 
+RUN mkdir -p /home/user/.config/gcloud/logs && \
+    mkdir -p /home/user/.config/gcloud/configurations && \
+
 # A last pass to make sure that an arbitrary user can write in $HOME
-#RUN chgrp -R 0 /home && chmod -R g=u /home
+RUN chgrp -R 0 /home && chmod -R g=u /home
 
 # back to the user
 USER 10001
