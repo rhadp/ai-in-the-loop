@@ -14,9 +14,11 @@ components:
       cpuRequest: "1"
       mountSources: true
       volumeMounts:
-        - name: home
-          path: /home/user
-  - name: home
+        - name: user-config
+          path: /home/user/.config
+        - name: user-config
+          path: /home/user/.claude
+  - name: user-config
     volume:
       size: 2Gi
 #commands:
