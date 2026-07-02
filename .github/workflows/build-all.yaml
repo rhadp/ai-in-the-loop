@@ -14,7 +14,7 @@ jobs:
   build-rhas-starter:
     uses: ./.github/workflows/build.yaml
     with:
-      container_name: rhas-starter
+      container_name: agentic-codespaces
     secrets: inherit
     permissions:
       packages: write

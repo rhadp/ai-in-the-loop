@@ -9,7 +9,7 @@ on:
         type: string
 
 env:
-  IMAGE_NAME: ${{ vars.REGISTRY }}/${{ vars.REGISTRY_ORG }}/${{ inputs.container_name }}
+  IMAGE_NAME: ${{ vars.REGISTRY_ORG }}/${{ inputs.container_name }}
 
 jobs:
   prepare:
