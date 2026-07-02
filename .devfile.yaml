@@ -1,0 +1,24 @@
+schemaVersion: 2.3.0
+metadata:
+  name: rhas-starter
+  tags:
+    - rhas
+    - jumpstarter
+components:
+  - name: workspace
+    container:
+      image: ghcr.io/rhadp/agentic-codespaces:latest
+      memoryLimit: "4Gi"
+      memoryRequest: "1Gi"
+      cpuLimit: "4"
+      cpuRequest: "1"
+      mountSources: true
+#commands:
+#  - id: init-workspace
+#    exec:
+#      component: workspace
+#      commandLine: |
+#        /usr/local/bin/init-workspace
+#events:
+#  postStart:
+#    - init-workspace
