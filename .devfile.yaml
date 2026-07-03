@@ -3,7 +3,7 @@ metadata:
   name: ai-in-the-loop
   tags:
     - rhas
-    - jumpstarter
+    - ai-in-the-loop
 components:
   - name: workspace
     container:
