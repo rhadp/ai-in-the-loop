@@ -9,6 +9,42 @@ ARG TARGETARCH
 ENV ARCH=${TARGETARCH:-arm64} \
     XDG_CONFIG_HOME=/home/tooling/.config 
 
+# set the virtual environment for jumpstarter etc
+ENV UV_PYTHON=python3.14 VIRTUAL_ENV=/venv
+
+# install this repository's version of jumpstarter
+ENV JUMPSTARTER_VERSION=main \
+    JUMPSTARTER_REPO=https://github.com/jumpstarter-dev/jumpstarter
+
+# install basic packages and common development dependencies
+RUN dnf install -y --setopt=tsflags=nodocs \
+    python3.14 python3.14-devel python3-pip
+
+# install protobuf compiler
+RUN mkdir -p /home/tooling/protobuf && \
+    if [ "$ARCH" = "arm64" ]; then \
+        URL=$(curl -s https://api.github.com/repos/protocolbuffers/protobuf/releases/latest \
+        | jq -r '.assets[] | select(.name | endswith("linux-aarch_64.zip")) | .browser_download_url') && \
+        curl -LO "$URL"; \
+    else \
+        URL=$(curl -s https://api.github.com/repos/protocolbuffers/protobuf/releases/latest \
+        | jq -r '.assets[] | select(.name | endswith("linux-x86_64.zip")) | .browser_download_url') && \
+        curl -LO "$URL"; \
+    fi && \
+    unzip "$(basename "$URL")" -d "/home/tooling/protobuf"
+    
+# install uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uv  /bin/uv
+COPY --from=ghcr.io/astral-sh/uv:latest /uvx /bin/uvx
+
+# install jumpstarter & other python dependencies
+COPY requirements.txt /tmp/requirements.txt
+
+RUN uv venv /venv && \
+    uv pip install "git+${JUMPSTARTER_REPO}@${JUMPSTARTER_VERSION}#subdirectory=python/packages/jumpstarter-all" && \
+    uv pip install -r /tmp/requirements.txt && \
+    rm -rf /tmp/requirements.txt
+
 # Install Claude Code, using direct binary download instead of the install.sh script to avoid OOM-killing
 # the binary's post-install setup step in memory-constrained container builds.
 RUN set -e; \
@@ -23,10 +59,9 @@ RUN set -e; \
     curl -fsSL -o /home/tooling/bin/claude "https://downloads.claude.ai/claude-code-releases/${version}/${platform}/claude"; \
     chmod +x /home/tooling/bin/claude
 
-# prepare for gcloud cli
-#RUN mkdir -p /home/tooling/.config/gcloud/logs && \
-#    mkdir -p /home/tooling/.config/gcloud/configurations
-#ENV CLOUDSDK_CONFIG=/home/tooling/.config/gcloud
+# clean up
+RUN dnf -y clean all --enablerepo='*' && \
+    rm -rf /var/cache/dnf
 
 # A last pass to make sure that an arbitrary user can write in $HOME
 RUN chgrp -R 0 /home && chmod -R g=u /home
