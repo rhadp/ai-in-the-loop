@@ -6,12 +6,27 @@ USER root
 ARG TARGETARCH
 
 # install centos stream & fedora repos, other vars
-ENV ARCH=${TARGETARCH:-arm64}
+ENV ARCH=${TARGETARCH:-arm64} \
+    XDG_CONFIG_HOME=/home/tooling/.config 
+
+# Install Claude Code, using direct binary download instead of the install.sh script to avoid OOM-killing
+# the binary's post-install setup step in memory-constrained container builds.
+RUN set -e; \
+    mkdir -p /home/tooling/bin /home/tooling/.claude && \
+    arch=$(uname -m | sed 's/x86_64/x64/;s/aarch64/arm64/'); \
+    if ldd /bin/ls 2>&1 | grep -q musl || [ -f /lib/libc.musl-x86_64.so.1 ] || [ -f /lib/libc.musl-aarch64.so.1 ]; then \
+        platform="linux-${arch}-musl"; \
+    else \
+        platform="linux-${arch}"; \
+    fi; \
+    version=$(curl -fsSL https://downloads.claude.ai/claude-code-releases/latest); \
+    curl -fsSL -o /home/tooling/bin/claude "https://downloads.claude.ai/claude-code-releases/${version}/${platform}/claude"; \
+    chmod +x /home/tooling/bin/claude
 
 # prepare for gcloud cli
-RUN mkdir -p /home/tooling/.config/gcloud/logs && \
-    mkdir -p /home/tooling/.config/gcloud/configurations
-ENV CLOUDSDK_CONFIG=/home/tooling/.config/gcloud
+#RUN mkdir -p /home/tooling/.config/gcloud/logs && \
+#    mkdir -p /home/tooling/.config/gcloud/configurations
+#ENV CLOUDSDK_CONFIG=/home/tooling/.config/gcloud
 
 # A last pass to make sure that an arbitrary user can write in $HOME
 RUN chgrp -R 0 /home && chmod -R g=u /home
